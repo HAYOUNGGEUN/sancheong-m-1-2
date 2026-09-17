@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>탄성력 실험실 (1학년 2반) · 용수철에 추를 매달아 보자</title>
+<meta name="description" content="중학교 1학년 과학 탄성력 실험 시뮬레이션. 용수철에 추를 매달아 늘어난 길이와 탄성력의 크기를 측정하고, 표와 그래프로 비례 관계를 찾아봅니다.">
+<meta name="theme-color" content="#d7e9e6">
+<style>
+:root{
+  --ink:#13201d;
+  --ink-soft:#40534e;
+  --ink-faint:#6b7c77;
+  --bench:#e9ece7;
+  --bench-2:#f5f6f3;
+  --card:#ffffff;
+  --line:#ccd5d0;
+  --line-soft:#e2e8e4;
+  --teal:#0f6f68;
+  --teal-deep:#0a544f;
+  --teal-soft:#d7e9e6;
+  --brass:#a86f1c;
+  --brass-soft:#f7ead2;
+  --limit:#bf4527;
+  --limit-soft:#fbe4dc;
+  --mono: ui-monospace, "SF Mono", "D2Coding", Menlo, Consolas, "Liberation Mono", monospace;
+  --sans: system-ui, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
+  --r:14px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  font-family:var(--sans);
+  color:var(--ink);
+  background:
+    radial-gradient(1200px 600px at 12% -8%, #dfe9e6 0%, rgba(223,233,230,0) 60%),
+    var(--bench-2);
+  line-height:1.6;
+  font-size:16px;
+}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px 72px}
+
+/* ---------- header ---------- */
+header.top{
+  padding:38px 0 22px;
+}
+.eyebrow{
+  font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--teal);display:flex;align-items:center;gap:10px;margin:0 0 14px;
+}
+.eyebrow::after{content:"";height:1px;flex:1;background:linear-gradient(90deg,var(--line),transparent)}
+h1{
+  font-size:clamp(30px,5.2vw,46px);line-height:1.12;margin:0 0 12px;letter-spacing:-.025em;font-weight:800;
+}
+h1 span{color:var(--teal)}
+.lead{max-width:62ch;color:var(--ink-soft);margin:0 0 20px;font-size:16.5px}
+.goals{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none}
+.goals li{
+  font-size:13.5px;background:var(--card);border:1px solid var(--line);border-radius:999px;
+  padding:7px 14px;color:var(--ink-soft);display:flex;gap:7px;align-items:center;
+}
+.goals li b{color:var(--teal);font-family:var(--mono);font-weight:700;font-size:12px}
+
+/* ---------- section shell ---------- */
+section{margin:26px 0 0}
+.sec-head{display:flex;align-items:baseline;gap:12px;margin:0 0 14px}
+.sec-num{
+  font-family:var(--mono);font-size:12px;font-weight:700;color:var(--teal);
+  border:1px solid var(--teal);border-radius:6px;padding:2px 7px;flex:none;
+}
+.sec-head h2{font-size:20px;margin:0;letter-spacing:-.01em;font-weight:750}
+.sec-head p{margin:0;color:var(--ink-faint);font-size:13.5px}
+.card{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:0 1px 0 rgba(19,32,29,.03), 0 8px 24px -18px rgba(19,32,29,.35);
+}
+
+/* ---------- lab grid ---------- */
+.lab{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(0,1fr);gap:18px;align-items:start}
+.lab-stage{padding:10px 10px 4px;position:relative;overflow:hidden}
+.lab-stage svg{width:100%;height:auto;display:block}
+.controls{padding:16px}
+.ctl-label{
+  font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-faint);margin:0 0 8px;
+}
+.seg{display:flex;gap:6px;background:var(--bench);border:1px solid var(--line);border-radius:11px;padding:5px;margin-bottom:16px}
+.seg button{
+  flex:1;border:0;background:transparent;font-family:inherit;font-size:13.5px;font-weight:650;color:var(--ink-soft);
+  padding:9px 6px;border-radius:8px;cursor:pointer;line-height:1.25;
+}
+.seg button small{display:block;font-family:var(--mono);font-size:10.5px;font-weight:600;color:var(--ink-faint);margin-top:2px}
+.seg button[aria-pressed="true"]{background:var(--card);color:var(--teal-deep);box-shadow:0 1px 3px rgba(19,32,29,.14)}
+.seg button[aria-pressed="true"] small{color:var(--teal)}
+.seg button:focus-visible,.btn:focus-visible,.mass button:focus-visible{outline:3px solid #7fc6c0;outline-offset:2px}
+
+.mass-picker{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.mass{display:flex;align-items:center;gap:0;border:1px solid var(--line);border-radius:11px;overflow:hidden;background:var(--card)}
+.mass button{
+  width:52px;height:52px;border:0;background:var(--card);font-size:24px;line-height:1;
+  color:var(--teal-deep);cursor:pointer;font-family:var(--sans);
+}
+.mass button:disabled{color:#b9c4bf;cursor:not-allowed}
+.mass button:hover:not(:disabled){background:var(--teal-soft)}
+.mass-val{flex:1;text-align:center;padding:4px 8px;border-left:1px solid var(--line);border-right:1px solid var(--line)}
+.mass-val b{display:block;font-family:var(--mono);font-size:19px;font-weight:700;letter-spacing:-.01em}
+.mass-val span{font-size:12px;color:var(--ink-faint)}
+.hint{font-size:13px;color:var(--ink-faint);margin:0}
+
+hr.sep{border:0;border-top:1px dashed var(--line);margin:16px 0}
+
+/* ---------- readouts ---------- */
+.readouts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.ro{background:var(--bench);border:1px solid var(--line-soft);border-radius:11px;padding:11px 13px}
+.ro .k{font-size:12.5px;color:var(--ink-faint);display:block;margin-bottom:3px}
+.ro .v{font-family:var(--mono);font-size:22px;font-weight:700;letter-spacing:-.02em;color:var(--ink)}
+.ro .u{font-size:12.5px;color:var(--ink-faint);font-family:var(--mono);margin-left:3px}
+.ro.force .v{color:var(--brass)}
+.ro.stretch .v{color:var(--teal-deep)}
+.ro.ratio .v{font-size:19px}
+.ro.warn{background:var(--limit-soft);border-color:#eebfae}
+.ro.warn .v{color:var(--limit)}
+
+.btn{
+  font-family:inherit;font-size:15px;font-weight:700;border-radius:11px;padding:14px 18px;cursor:pointer;
+  border:1px solid transparent;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn.primary{background:var(--teal);color:#fff;width:100%;box-shadow:0 6px 16px -10px var(--teal)}
+.btn.primary:hover{background:var(--teal-deep)}
+.btn.primary:disabled{background:#c2ccc8;color:#f2f5f3;cursor:not-allowed;box-shadow:none}
+.btn.ghost{background:var(--card);border-color:var(--line);color:var(--ink-soft)}
+.btn.ghost:hover{background:var(--bench)}
+.btn.tiny{font-size:12.5px;padding:8px 12px;border-radius:9px;font-weight:650}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap}
+.msg{font-size:13.5px;margin:10px 2px 0;min-height:21px;color:var(--ink-faint)}
+.msg.ok{color:var(--teal-deep);font-weight:600}
+.msg.bad{color:var(--limit);font-weight:600}
+
+.alert{
+  margin-top:14px;border:1px solid #eebfae;background:var(--limit-soft);border-radius:11px;padding:12px 14px;
+}
+.alert[hidden]{display:none}
+.alert h4{margin:0 0 4px;font-size:14px;color:var(--limit)}
+.alert p{margin:0 0 10px;font-size:13px;color:#7d3520}
+
+/* ---------- table ---------- */
+.table-wrap{overflow-x:auto;border-radius:var(--r);border:1px solid var(--line);background:var(--card)}
+table{border-collapse:collapse;width:100%;min-width:720px;font-size:14px}
+caption{text-align:left;padding:14px 16px 10px;font-size:13px;color:var(--ink-faint)}
+th,td{padding:10px 12px;text-align:center;border-bottom:1px solid var(--line-soft)}
+thead th{
+  background:var(--bench);font-size:12.5px;font-weight:700;color:var(--ink-soft);
+  border-bottom:1px solid var(--line);white-space:nowrap;position:sticky;top:0;
+}
+tbody td{font-family:var(--mono);font-size:13.5px}
+tbody td.spring{font-family:var(--sans);font-weight:700}
+tbody tr:hover{background:#f6faf9}
+tbody tr.over{background:#fdf1ec}
+tbody tr.over td{color:#8c3a20}
+td.ratio{font-weight:700;color:var(--teal-deep)}
+tbody tr.over td.ratio{color:var(--limit)}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:1px}
+.empty{padding:34px 18px;text-align:center;color:var(--ink-faint);font-size:14px}
+.tools{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin:12px 0 0}
+
+/* ---------- graph ---------- */
+.graph-card{padding:16px}
+.graph-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px}
+.axis-toggle{display:flex;gap:6px;background:var(--bench);border:1px solid var(--line);border-radius:10px;padding:4px}
+.axis-toggle button{
+  border:0;background:transparent;font-family:inherit;font-size:12.5px;font-weight:650;color:var(--ink-soft);
+  padding:7px 12px;border-radius:7px;cursor:pointer;
+}
+.axis-toggle button[aria-pressed="true"]{background:var(--card);color:var(--teal-deep);box-shadow:0 1px 2px rgba(19,32,29,.13)}
+#graphBox svg{width:100%;height:auto;display:block}
+.legend{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.lg{
+  display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:10px;
+  padding:7px 11px;font-size:13px;background:var(--card);
+}
+.lg b{font-family:var(--mono);font-size:12.5px;color:var(--teal-deep)}
+.lg.off{opacity:.45}
+
+/* ---------- questions ---------- */
+.qa{padding:18px}
+.q{border-top:1px solid var(--line-soft);padding:16px 0 4px}
+.q:first-of-type{border-top:0;padding-top:6px}
+.q h3{margin:0 0 6px;font-size:15.5px;display:flex;gap:9px;align-items:flex-start;line-height:1.45}
+.q h3 em{
+  font-style:normal;font-family:var(--mono);font-size:12px;color:#fff;background:var(--teal);
+  border-radius:50%;width:22px;height:22px;flex:none;display:grid;place-items:center;margin-top:1px;font-weight:700;
+}
+.q p.tip{margin:0 0 9px 31px;font-size:13px;color:var(--ink-faint)}
+textarea{
+  width:100%;min-height:82px;border:1px solid var(--line);border-radius:10px;padding:11px 13px;
+  font-family:inherit;font-size:14.5px;color:var(--ink);background:var(--bench-2);resize:vertical;line-height:1.55;
+}
+textarea:focus{outline:none;border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px var(--teal-soft)}
+.fill{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:15px;margin:6px 0 0 31px}
+.fill input{
+  border:0;border-bottom:2px solid var(--teal);background:transparent;font-family:var(--mono);font-size:15px;
+  width:190px;padding:4px 6px;color:var(--teal-deep);font-weight:700;
+}
+.fill input:focus{outline:none;border-bottom-color:var(--brass)}
+details.answers{margin-top:18px;border:1px solid var(--line);border-radius:11px;background:var(--bench)}
+details.answers summary{padding:12px 15px;cursor:pointer;font-size:14px;font-weight:650;color:var(--teal-deep)}
+details.answers div{padding:2px 18px 16px;font-size:14px;color:var(--ink-soft)}
+details.answers ul{margin:8px 0 0;padding-left:20px}
+details.answers li{margin-bottom:6px}
+
+/* ---------- steps ---------- */
+.steps{columns:2;column-gap:28px;padding:18px 20px;margin:0;font-size:14.5px}
+.steps li{margin:0 0 9px;break-inside:avoid;color:var(--ink-soft)}
+.steps li b{color:var(--ink)}
+.note{
+  margin-top:12px;font-size:13px;color:var(--ink-faint);border-left:3px solid var(--teal-soft);padding:2px 0 2px 13px;
+}
+footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);font-size:12.5px;color:var(--ink-faint);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+footer code{font-family:var(--mono);font-size:12px}
+
+/* ---------- responsive ---------- */
+@media (max-width:880px){
+  .lab{grid-template-columns:1fr}
+  .steps{columns:1}
+  .wrap{padding:0 14px 60px}
+  h1{margin-bottom:10px}
+}
+@media (max-width:520px){
+  .readouts{grid-template-columns:1fr 1fr}
+  .ro .v{font-size:19px}
+  .seg button{font-size:12.5px;padding:8px 4px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+@media print{
+  body{background:#fff}
+  .no-print{display:none!important}
+  .card{box-shadow:none}
+  .lab{grid-template-columns:1fr 1fr}
+  .table-wrap{overflow:visible}
+  table{min-width:0;font-size:11.5px}
+  thead th{position:static}
+  section,table,figure{break-inside:avoid}
+  textarea{border-color:#999;background:#fff;min-height:64px}
+}
+
+/* ---------- 학생 선택 / 교사용 ---------- */
+.student-bar{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  margin:16px 0 0;padding:10px 14px;background:var(--card);border:1px solid var(--line);
+  border-radius:var(--r);box-shadow:0 1px 0 rgba(19,32,29,.03);
+}
+.sb-who{display:flex;align-items:center;gap:9px;font-size:15px}
+.sb-class{font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:#fff;background:var(--teal);
+  border-radius:999px;padding:3px 10px;font-weight:700}
+.sb-who b{font-size:19px;color:var(--teal-deep);letter-spacing:-.02em}
+.sb-actions{display:flex;gap:8px}
+
+.gate{position:fixed;inset:0;z-index:9999;background:linear-gradient(160deg,#eef3f1,#dbe7e3);
+  display:flex;align-items:flex-start;justify-content:center;padding:34px 16px 40px;overflow:auto}
+.gate[hidden]{display:none}
+.gate-card{background:var(--card);border:1px solid var(--line);border-radius:18px;width:100%;
+  max-width:740px;padding:28px 28px 22px;box-shadow:0 26px 60px -34px rgba(19,32,29,.55)}
+.gate-card.wide{max-width:960px}
+.gate-title{margin:2px 0 8px;font-size:24px;letter-spacing:-.02em}
+.gate-desc{margin:0 0 16px;font-size:14.5px;color:var(--ink-soft)}
+.gate-name{display:flex;align-items:center;gap:9px;font-size:14px;color:var(--ink-soft);
+  margin:0 0 14px;font-weight:600}
+.gate-name input{flex:1;max-width:230px;border:1px solid var(--line);border-radius:9px;
+  padding:9px 12px;font-family:inherit;font-size:14.5px;background:var(--bench-2)}
+.gate-name input:focus{outline:none;border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px var(--teal-soft)}
+.roster{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:9px;margin:6px 0 12px}
+.roster button{
+  position:relative;aspect-ratio:1/1;border:1px solid var(--line);background:var(--bench-2);
+  border-radius:11px;font-family:var(--mono);font-size:17px;font-weight:700;color:var(--ink-soft);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;flex-direction:column;
+}
+.roster button:hover{background:var(--teal-soft);border-color:var(--teal);color:var(--teal-deep);
+  transform:translateY(-1px)}
+.roster button:focus-visible{outline:3px solid #7fc6c0;outline-offset:2px}
+.roster button.done{background:var(--teal);border-color:var(--teal-deep);color:#fff}
+.roster button.done small{color:#d7e9e6}
+.roster button small{font-size:10.5px;font-weight:600;color:var(--ink-faint);margin-top:2px}
+.gate-info{margin:0 0 12px;font-size:13px;color:var(--ink-faint)}
+.gate-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+  border-top:1px dashed var(--line);padding-top:14px;font-size:13.5px;color:var(--ink-faint)}
+.tp-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.tp-foot{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px}
+.tp-foot span{font-size:13px;color:var(--ink-faint)}
+.btn.danger{background:var(--limit);color:#fff}
+.btn.danger:hover{background:#9c3620}
+table.tp{width:100%;min-width:0;font-size:14px}
+table.tp th,table.tp td{padding:8px 10px;font-size:13.5px}
+table.tp td.num{font-family:var(--mono);font-weight:700}
+table.tp td.zero{color:var(--ink-faint)}
+table.tp td.full{font-family:var(--mono);font-weight:700;color:var(--teal-deep)}
+table.tp .mini{display:flex;gap:6px;justify-content:center}
+@media (max-width:760px){
+  .roster{grid-template-columns:repeat(6,minmax(0,1fr))}
+  .gate-card{padding:20px 16px}
+}
+@media print{
+  #gate,#teacherPanel,.student-bar{display:none!important}
+}
+</style>
+</head>
+<body>
+
+<div class="gate" id="gate" hidden>
+  <div class="gate-card">
+    <p class="eyebrow">중학교 1학년 과학 · 여러 가지 힘</p>
+    <h2 class="gate-title">1학년 2반 · 내 번호를 선택하세요</h2>
+    <p class="gate-desc">
+      번호마다 실험 기록과 답안이 <b>따로 저장</b>됩니다. 같은 기기를 여러 학생이 사용해도
+      서로의 결과가 섞이지 않습니다.
+    </p>
+    <label class="gate-name">이름 (선택) <input type="text" id="stuName" maxlength="12" placeholder="예: 김하늘"></label>
+    <div class="roster" id="roster"></div>
+    <p class="gate-info" id="rosterInfo"></p>
+    <div class="gate-foot">
+      <span>번호를 누르면 실험실이 열립니다.</span>
+      <button class="btn tiny ghost" type="button" id="gateTeacher">교사용 보기</button>
+    </div>
+  </div>
+</div>
+
+<div class="gate" id="teacherPanel" hidden>
+  <div class="gate-card wide">
+    <div class="tp-head">
+      <div>
+        <p class="eyebrow">교사용</p>
+        <h2 class="gate-title">1학년 2반 활동 현황 (이 기기 기준)</h2>
+      </div>
+      <button class="btn tiny ghost" type="button" id="tpClose">닫기</button>
+    </div>
+    <p class="gate-desc">이 브라우저에 저장된 기록만 표시됩니다. 학생이 각자 다른 기기에서 활동하면
+      선생님 화면에는 나타나지 않으니, 기기별로 확인하거나 학생 화면의 표·그래프를 함께 보세요.</p>
+    <div class="table-wrap" style="max-height:52vh;overflow:auto">
+      <table class="tp" id="tpTable">
+        <thead>
+          <tr><th>번호</th><th>이름</th><th>기록 수</th><th>서술 답안</th><th>마지막 저장</th><th>관리</th></tr>
+        </thead>
+        <tbody id="tpBody"></tbody>
+      </table>
+    </div>
+    <div class="tp-foot">
+      <button class="btn tiny ghost" type="button" id="tpCsv">전체 기록 CSV 내보내기</button>
+      <button class="btn tiny danger" type="button" id="tpClear">전체 기록 삭제</button>
+      <span id="tpSum"></span>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="student-bar no-print">
+    <div class="sb-who">
+      <span class="sb-class">1학년 2반</span>
+      <b id="whoNo">–</b><span id="whoName"></span>
+    </div>
+    <div class="sb-actions">
+      <button class="btn tiny ghost" type="button" id="changeBtn">번호 변경</button>
+      <button class="btn tiny ghost" type="button" id="teacherBtn">교사용 보기</button>
+    </div>
+  </div>
+
+  <header class="top">
+    <p class="eyebrow">중학교 1학년 과학 · 여러 가지 힘</p>
+    <h1>탄성력 <span>실험실</span></h1>
+    <p class="lead">
+      용수철에 추를 하나씩 매달아 보세요. 용수철이 <b>얼마나 늘어나는지</b>와 그때 받는 <b>탄성력의 크기</b>를
+      재어 표에 기록하고, 그래프에 점을 찍으면 두 값 사이의 규칙이 보입니다.
+    </p>
+    <ul class="goals">
+      <li><b>01</b> 용수철이 늘어난 길이를 정확히 읽는다</li>
+      <li><b>02</b> 탄성력의 크기를 무게와 비교한다</li>
+      <li><b>03</b> 표와 그래프에서 비례 관계를 찾는다</li>
+      <li><b>04</b> 탄성 한계를 넘으면 어떻게 되는지 확인한다</li>
+    </ul>
+  </header>
+
+  <section aria-labelledby="s1">
+    <div class="sec-head">
+      <span class="sec-num">01</span>
+      <h2 id="s1">실험 장치를 움직여 보자</h2>
+      <p>추를 달고, 늘어난 길이를 읽고, 기록합니다</p>
+    </div>
+
+    <div class="lab">
+      <div class="card lab-stage">
+        <svg id="lab" viewBox="0 0 560 540" role="img" aria-labelledby="labTitle labDesc">
+          <title id="labTitle">용수철에 추를 매다는 실험 장치</title>
+          <desc id="labDesc">왼쪽에 스탠드, 가운데에 용수철과 무게추, 오른쪽에 자가 그려져 있습니다.</desc>
+
+          <!-- 스탠드 -->
+          <g>
+            <rect x="24" y="506" width="152" height="16" rx="4" fill="#c3cdc8" stroke="#8f9c96" stroke-width="1.5"/>
+            <rect x="40" y="34" width="14" height="480" rx="5" fill="#d2dad5" stroke="#8f9c96" stroke-width="1.5"/>
+            <rect x="54" y="44" width="100" height="13" rx="5" fill="#d2dad5" stroke="#8f9c96" stroke-width="1.5"/>
+            <text x="47" y="26" font-family="var(--mono)" font-size="11" fill="#6b7c77">스탠드</text>
+          </g>
+
+          <!-- 자 -->
+          <g id="rulerG">
+            <rect x="300" y="56" width="42" height="278" rx="5" fill="#fefdf9" stroke="#8f9c96" stroke-width="1.5"/>
+            <g id="rulerTicks" stroke="#8f9c96" stroke-width="1"></g>
+            <g id="rulerLabels" font-family="var(--mono)" font-size="9.5" fill="#6b7c77"></g>
+            <text x="321" y="46" font-family="var(--mono)" font-size="11" fill="#6b7c77" text-anchor="middle">자 (cm)</text>
+          </g>
+
+          <!-- 용수철 -->
+          <polyline id="springPath" fill="none" stroke="#8fa0a8" stroke-width="4.5"
+                    stroke-linecap="round" stroke-linejoin="round"/>
+          <rect id="hook" x="128" y="56" width="24" height="10" rx="4" fill="#8f9c96"/>
+          <text id="springTag" x="140" y="24" font-family="var(--mono)" font-size="12.5" font-weight="700"
+                fill="#0f6f68" text-anchor="middle">용수철 A</text>
+
+          <!-- 늘어난 길이 표시 -->
+          <g id="bracketG"></g>
+
+          <!-- 추 -->
+          <g id="weights"></g>
+
+          <!-- 화살표 -->
+          <g id="arrows"></g>
+        </svg>
+      </div>
+
+      <div class="card controls">
+        <p class="ctl-label">용수철 고르기</p>
+        <div class="seg" id="springSeg" role="group" aria-label="용수철 고르기"></div>
+
+        <p class="ctl-label">추 달기 (추 1개 = 100 g)</p>
+        <div class="mass-picker">
+          <div class="mass">
+            <button type="button" id="minus" aria-label="추 한 개 빼기">−</button>
+            <span class="mass-val"><b id="massNum">0</b><span id="massSub">추 0개 · 0 g</span></span>
+            <button type="button" id="plus" aria-label="추 한 개 더 달기">+</button>
+          </div>
+        </div>
+        <p class="hint" id="massHint">추를 한 개 이상 달면 측정할 수 있습니다.</p>
+
+        <hr class="sep">
+
+        <div class="readouts">
+          <div class="ro force">
+            <span class="k">추의 무게 (아래 방향)</span>
+            <span class="v" id="roWeight" aria-live="polite">0<span class="u">N</span></span>
+          </div>
+          <div class="ro stretch" id="roStretchBox">
+            <span class="k">늘어난 길이</span>
+            <span class="v" id="roStretch" aria-live="polite">0.0<span class="u">cm</span></span>
+          </div>
+          <div class="ro force">
+            <span class="k">탄성력의 크기 (위 방향)</span>
+            <span class="v" id="roElastic" aria-live="polite">0<span class="u">N</span></span>
+          </div>
+          <div class="ro ratio">
+            <span class="k">탄성력 ÷ 늘어난 길이</span>
+            <span class="v" id="roRatio" aria-live="polite">–<span class="u">N/m</span></span>
+          </div>
+        </div>
+
+        <button class="btn primary" type="button" id="recordBtn">측정 기록하기</button>
+        <p class="msg" id="msg" role="status"></p>
+
+        <div class="alert" id="limitAlert" hidden>
+          <h4>⚠ 탄성 한계를 넘었습니다</h4>
+          <p>이 용수철은 더 이상 늘어난 길이에 비례해서 늘어나지 않고, 추를 모두 내려도 원래 길이로 돌아오지 않습니다(영구 변형).</p>
+          <button class="btn tiny ghost" type="button" id="replaceBtn">새 용수철로 교체</button>
+        </div>
+
+        <hr class="sep">
+        <p class="ctl-label">실험 방법</p>
+        <ol class="steps" style="padding:0;columns:1;font-size:14px">
+          <li>용수철을 고르고 <b>추를 1개</b> 달아요.</li>
+          <li>자의 눈금으로 <b>늘어난 길이</b>를 읽어요.</li>
+          <li><b>측정 기록하기</b>를 눌러 표에 저장해요.</li>
+          <li>추를 1개씩 늘려 <b>6~7번</b> 반복해요.</li>
+          <li>다른 용수철로도 해 보고 그래프를 비교해요.</li>
+        </ol>
+        <p class="note">무게는 질량 100 g을 1 N으로 계산했습니다(중력의 크기를 1 kg당 10 N으로 본 값이며, 실제로는 약 9.8 N입니다).</p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="s2">
+    <div class="sec-head">
+      <span class="sec-num">02</span>
+      <h2 id="s2">측정 기록 표</h2>
+      <p>기록한 값은 브라우저에 저장되어 화면을 새로 고쳐도 남아 있습니다</p>
+    </div>
+    <div class="table-wrap">
+      <table id="dataTable">
+        <caption id="tableCaption">아직 기록이 없습니다. 위에서 추를 달고 <b>측정 기록하기</b>를 눌러 보세요.</caption>
+        <thead>
+          <tr>
+            <th scope="col">순번</th>
+            <th scope="col">용수철</th>
+            <th scope="col">추의 질량<br>(g)</th>
+            <th scope="col">무게<br>(N)</th>
+            <th scope="col">늘어난 길이<br>(cm)</th>
+            <th scope="col">탄성력의 크기<br>(N)</th>
+            <th scope="col">탄성력 ÷ 늘어난 길이<br>(N/m)</th>
+            <th scope="col">비고</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div class="tools no-print">
+      <button class="btn tiny ghost" type="button" id="csvBtn">표를 CSV 파일로 저장</button>
+      <button class="btn tiny ghost" type="button" id="undoBtn">마지막 기록 지우기</button>
+      <button class="btn tiny ghost" type="button" id="clearBtn">기록 전체 삭제</button>
+      <button class="btn tiny ghost" type="button" id="printBtn">표·그래프 인쇄</button>
+    </div>
+  </section>
+
+  <section aria-labelledby="s3">
+    <div class="sec-head">
+      <span class="sec-num">03</span>
+      <h2 id="s3">그래프로 나타내기</h2>
+      <p>가로축·세로축을 바꾸어 보며 두 값의 관계를 확인합니다</p>
+    </div>
+    <div class="card graph-card">
+      <div class="graph-head no-print">
+        <div class="axis-toggle" id="axisToggle" role="group" aria-label="가로축 고르기">
+          <button type="button" data-mode="len" aria-pressed="true">가로축 = 늘어난 길이</button>
+          <button type="button" data-mode="mass" aria-pressed="false">가로축 = 추의 질량</button>
+        </div>
+        <p class="hint" id="graphHint">점이 2개 이상 모이면 직선(비례 관계)이 보입니다.</p>
+      </div>
+      <div id="graphBox"></div>
+      <div class="legend" id="legend"></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="s4">
+    <div class="sec-head">
+      <span class="sec-num">04</span>
+      <h2 id="s4">생각해보기</h2>
+      <p>표와 그래프를 근거로 답을 써 보세요. 입력한 내용은 이 브라우저에 저장됩니다</p>
+    </div>
+    <div class="card qa">
+      <div class="q">
+        <h3><em>1</em>추를 2배, 3배로 달면 늘어난 길이는 어떻게 변하나요?</h3>
+        <p class="tip">표에서 추의 질량이 100 g → 200 g → 300 g일 때 늘어난 길이를 비교해 보세요.</p>
+        <textarea data-q="q1" aria-label="생각해보기 1번 답"></textarea>
+      </div>
+      <div class="q">
+        <h3><em>2</em>그래프의 모양은 어떤가요? 그 모양이 뜻하는 것은 무엇인가요?</h3>
+        <p class="tip">점들이 어떤 선 근처에 모여 있는지, 그 선이 원점을 지나는지 살펴보세요.</p>
+        <textarea data-q="q2" aria-label="생각해보기 2번 답"></textarea>
+      </div>
+      <div class="q">
+        <h3><em>3</em>같은 무게의 추를 용수철 A와 B에 달았을 때 늘어난 길이가 다른 까닭은 무엇일까요?</h3>
+        <p class="tip">두 용수철의 기울기 값(그래프 아래 범례)을 비교해 보세요.</p>
+        <textarea data-q="q3" aria-label="생각해보기 3번 답"></textarea>
+      </div>
+      <div class="q">
+        <h3><em>4</em>탄성 한계를 넘긴 뒤에는 표와 그래프가 어떻게 달라지나요?</h3>
+        <p class="tip">추를 많이 달아 한계를 넘겨 보고, 비고 칸에 표시된 기록을 확인해 보세요.</p>
+        <textarea data-q="q4" aria-label="생각해보기 4번 답"></textarea>
+      </div>
+      <div class="q">
+        <h3><em>5</em>오늘 실험으로 알게 된 규칙을 문장으로 완성해 보세요.</h3>
+        <p class="tip">탄성 한계 안에서 성립하는 규칙입니다.</p>
+        <div class="fill">
+          <span>탄성 한계 안에서 용수철이 늘어난 길이는 탄성력의 크기에</span>
+          <input type="text" data-q="q5" aria-label="5번 빈칸 답" placeholder="">
+          <span>한다.</span>
+        </div>
+      </div>
+
+      <details class="answers no-print">
+        <summary>스스로 점검하기 (정답 예시)</summary>
+        <div>
+          <ul>
+            <li><b>1.</b> 추의 질량이 2배, 3배가 되면 늘어난 길이도 2배, 3배가 된다. (예: 용수철 A에서 100 g → 2.0 cm, 300 g → 6.0 cm)</li>
+            <li><b>2.</b> 원점을 지나는 직선 모양이다. 늘어난 길이가 커질수록 탄성력의 크기도 일정하게 커진다.</li>
+            <li><b>3.</b> 용수철마다 늘어나기 쉬운 정도가 다르기 때문이다. 기울기가 클수록 같은 무게에서 적게 늘어나는 뻣뻣한 용수철이다.</li>
+            <li><b>4.</b> 늘어난 길이가 비례해서 늘지 않고, 탄성력 ÷ 늘어난 길이 값이 작아지며, 그래프의 점이 직선에서 벗어난다. 추를 내려도 원래 길이로 돌아오지 않는다.</li>
+            <li><b>5.</b> 비례(정비례)</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <footer>
+    <span>중학교 1학년 과학 · 여러 가지 힘 · 탄성력 실험실</span>
+    <span><code>1학년 2반 · 번호별 개별 저장</code> · 인터넷 없이도 작동하며, 기록과 답안은 이 브라우저에 번호별로 저장됩니다</span>
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var G = 10;            // N/kg (계산 편의를 위해 10으로 사용)
+  var L0 = 12;           // 용수철의 원래 길이 (cm)
+  var PXCM = 6;          // 1 cm = 6 px
+  var CX = 140;          // 용수철 중심 x
+  var TOP = 64;          // 용수철 위쪽 y
+
+  var SPRINGS = [
+    { id:"A", k:50,  limit:15,  color:"#0f6f68", shape:"circle",   name:"용수철 A", desc:"k = 50 N/m"  },
+    { id:"B", k:100, limit:7.5, color:"#a86f1c", shape:"square",   name:"용수철 B", desc:"k = 100 N/m" },
+    { id:"C", k:25,  limit:25,  color:"#34518f", shape:"triangle", name:"용수철 C", desc:"k = 25 N/m"  }
+  ];
+
+  var state = {
+    sid:"A",
+    massG:0,
+    perm:{A:0,B:0,C:0},
+    rows:[],
+    visCm:L0,
+    xMode:"len",
+    no:0,
+    name:""
+  };
+
+  var el = {
+    springSeg: document.getElementById("springSeg"),
+    plus: document.getElementById("plus"),
+    minus: document.getElementById("minus"),
+    massNum: document.getElementById("massNum"),
+    massSub: document.getElementById("massSub"),
+    massHint: document.getElementById("massHint"),
+    roWeight: document.getElementById("roWeight"),
+    roStretch: document.getElementById("roStretch"),
+    roElastic: document.getElementById("roElastic"),
+    roRatio: document.getElementById("roRatio"),
+    roStretchBox: document.getElementById("roStretchBox"),
+    recordBtn: document.getElementById("recordBtn"),
+    msg: document.getElementById("msg"),
+    limitAlert: document.getElementById("limitAlert"),
+    replaceBtn: document.getElementById("replaceBtn"),
+    springPath: document.getElementById("springPath"),
+    springTag: document.getElementById("springTag"),
+    weights: document.getElementById("weights"),
+    arrows: document.getElementById("arrows"),
+    bracketG: document.getElementById("bracketG"),
+    rulerTicks: document.getElementById("rulerTicks"),
+    rulerLabels: document.getElementById("rulerLabels"),
+    tbody: document.getElementById("tbody"),
+    tableCaption: document.getElementById("tableCaption"),
+    graphBox: document.getElementById("graphBox"),
+    legend: document.getElementById("legend"),
+    graphHint: document.getElementById("graphHint"),
+    axisToggle: document.getElementById("axisToggle"),
+    csvBtn: document.getElementById("csvBtn"),
+    undoBtn: document.getElementById("undoBtn"),
+    clearBtn: document.getElementById("clearBtn"),
+    printBtn: document.getElementById("printBtn")
+  };
+
+  function sp(){ for(var i=0;i<SPRINGS.length;i++){ if(SPRINGS[i].id===state.sid) return SPRINGS[i]; } return SPRINGS[0]; }
+  function weightN(){ return state.massG/1000*G; }                 // N
+  function rawX(){ return weightN()/sp().k*100; }                    // cm (비례식)
+  function overLimit(){ return rawX() > sp().limit + 1e-9; }
+  function effX(){                                                  // 실제 늘어난 길이 (cm)
+    var x = rawX(), L = sp().limit;
+    return x > L ? L + (x-L)*1.5 : x;
+  }
+  function totalCm(){ return L0 + state.perm[state.sid] + effX(); }
+  function fmt(v,d){ return Number(v).toFixed(d===undefined?2:d); }
+
+  /* ---------- 눈금자 ---------- */
+  (function buildRuler(){
+    var t="", l="", cm;
+    for(cm=0; cm<=40; cm++){
+      var y = TOP + cm*PXCM;
+      var big = (cm%5===0);
+      t += '<line x1="'+(big?300:312)+'" y1="'+y+'" x2="'+(big?342:340)+'" y2="'+y+'"'+(big?' stroke-width="1.4"':'')+'/>';
+      if(big) l += '<text x="296" y="'+(y+3.5)+'" text-anchor="end">'+cm+'</text>';
+    }
+    el.rulerTicks.innerHTML = t;
+    el.rulerLabels.innerHTML = l;
+  })();
+
+  /* ---------- 용수철 코일 ---------- */
+  function coilPoints(lengthCm){
+    var len = Math.max(lengthCm*PXCM, 6), r = 14, turns = 12, n = 300, head = 8, tail = 10;
+    var coil = Math.max(len-head-tail, 4), pts = [], i, t;
+    pts.push([CX, TOP]);
+    pts.push([CX, TOP+head]);
+    for(i=0;i<=n;i++){ t=i/n; pts.push([CX + r*Math.sin(2*Math.PI*turns*t), TOP+head+t*coil]); }
+    pts.push([CX, TOP+len]);
+    var out=[];
+    for(i=0;i<pts.length;i++){ out.push(pts[i][0].toFixed(1)+","+pts[i][1].toFixed(1)); }
+    return out.join(" ");
+  }
+
+  /* ---------- 실험 장치 그리기 ---------- */
+  function drawLab(){
+    var cm = state.visCm, lenPx = cm*PXCM, bottomY = TOP + lenPx;
+    el.springPath.setAttribute("points", coilPoints(cm));
+    el.springTag.textContent = sp().name;
+    el.springTag.setAttribute("fill", sp().color);
+
+    // 늘어난 길이 브래킷
+    var baseY = TOP + (L0 + state.perm[state.sid])*PXCM;
+    var y1 = Math.min(baseY, bottomY), y2 = Math.max(baseY, bottomY);
+    var x1 = 352, x2 = 366, mid = (y1+y2)/2;
+    var g = '';
+    if(y2-y1 > 0.6){
+      g += '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y1+'" stroke="#0f6f68" stroke-width="1.6"/>';
+      g += '<line x1="'+x1+'" y1="'+y2+'" x2="'+x2+'" y2="'+y2+'" stroke="#0f6f68" stroke-width="1.6"/>';
+      g += '<line x1="'+(x1+2)+'" y1="'+mid+'" x2="'+(x2-2)+'" y2="'+mid+'" stroke="#0f6f68" stroke-width="1.6"/>';
+      g += '<line x1="'+(x1+2)+'" y1="'+y1+'" x2="'+(x1+2)+'" y2="'+y2+'" stroke="#0f6f68" stroke-width="1.6" stroke-dasharray="4 3"/>';
+      g += '<text x="374" y="'+(mid+4)+'" font-family="var(--mono)" font-size="13" font-weight="700" fill="#0f6f68">늘어난 길이 '+fmt(effX(),1)+' cm</text>';
+    } else {
+      g += '<text x="374" y="'+(baseY+4)+'" font-family="var(--mono)" font-size="12.5" fill="#6b7c77">늘어난 길이 0.0 cm</text>';
+    }
+    el.bracketG.innerHTML = g;
+
+    // 추
+    var n = Math.round(state.massG/100), w = 84, h = 20, x = CX - w/2, y = bottomY + 2, i, s = '';
+    s += '<rect x="'+(CX-9)+'" y="'+(bottomY-4)+'" width="18" height="8" rx="3" fill="#8f9c96"/>';
+    for(i=0;i<n;i++){
+      s += '<rect x="'+x+'" y="'+(y+i*h)+'" width="'+w+'" height="'+(h-2)+'" rx="4" fill="#cfd7d2" stroke="#8f9c96" stroke-width="1.2"/>';
+      s += '<text x="'+CX+'" y="'+(y+i*h+13.5)+'" font-family="var(--mono)" font-size="11" fill="#40534e" text-anchor="middle">100 g</text>';
+    }
+    el.weights.innerHTML = s;
+
+    // 힘 화살표
+    var a = '';
+    if(state.massG > 0){
+      var arrowLen = 54;
+      var wy = bottomY + 8 + Math.max(Math.round(state.massG/100)*h/2, 10);
+      // 무게: 아래 방향 (왼쪽)
+      a += '<line x1="92" y1="'+(wy-arrowLen/2)+'" x2="92" y2="'+(wy+arrowLen/2)+'" stroke="#a86f1c" stroke-width="3" stroke-linecap="round"/>';
+      a += '<path d="M92 '+(wy+arrowLen/2+8)+' l-6 -11 h12 z" fill="#a86f1c"/>';
+      a += '<text x="84" y="'+(wy+4)+'" font-family="var(--mono)" font-size="12.5" font-weight="700" fill="#a86f1c" text-anchor="end">무게 '+fmt(weightN(),1)+' N</text>';
+      // 탄성력: 위 방향 (오른쪽)
+      var ey = bottomY - 34;
+      a += '<line x1="196" y1="'+(ey+arrowLen/2)+'" x2="196" y2="'+(ey-arrowLen/2)+'" stroke="'+sp().color+'" stroke-width="3" stroke-linecap="round"/>';
+      a += '<path d="M196 '+(ey-arrowLen/2-8)+' l-6 11 h12 z" fill="'+sp().color+'"/>';
+      a += '<text x="204" y="'+(ey+4)+'" font-family="var(--mono)" font-size="12.5" font-weight="700" fill="'+sp().color+'">탄성력 '+fmt(weightN(),1)+' N</text>';
+    }
+    el.arrows.innerHTML = a;
+  }
+
+  /* ---------- 애니메이션 ---------- */
+  var anim = null;
+  function animateTo(targetCm){
+    if(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches){
+      state.visCm = targetCm; drawLab(); return;
+    }
+    var start = state.visCm, delta = targetCm - start, t0 = null, dur = 420;
+    if(anim) cancelAnimationFrame(anim);
+    function step(ts){
+      if(t0===null) t0 = ts;
+      var p = Math.min((ts-t0)/dur, 1);
+      state.visCm = start + delta*(1-Math.pow(1-p,3));
+      drawLab();
+      if(p<1) anim = requestAnimationFrame(step); else { state.visCm = targetCm; drawLab(); }
+    }
+    anim = requestAnimationFrame(step);
+  }
+
+  /* ---------- 계기판 ---------- */
+  function refreshReadouts(){
+    var w = weightN(), x = effX(), over = overLimit();
+    el.roWeight.innerHTML = fmt(w,1) + '<span class="u">N</span>';
+    el.roElastic.innerHTML = fmt(w,1) + '<span class="u">N</span>';
+    el.roStretch.innerHTML = fmt(x,1) + '<span class="u">cm</span>';
+    if(state.massG>0){
+      el.roRatio.innerHTML = fmt(w/(x/100), 1) + '<span class="u">N/m</span>';
+    } else {
+      el.roRatio.innerHTML = '–<span class="u">N/m</span>';
+    }
+    el.roStretchBox.className = "ro stretch" + (over ? " warn" : "");
+    el.massNum.textContent = Math.round(state.massG/100);
+    el.massSub.textContent = "추 " + Math.round(state.massG/100) + "개 · " + state.massG + " g";
+    el.minus.disabled = state.massG <= 0;
+    el.plus.disabled = state.massG >= 800;
+    el.recordBtn.disabled = state.massG <= 0;
+    el.massHint.textContent = state.massG<=0
+      ? "추를 한 개 이상 달면 측정할 수 있습니다."
+      : (over ? "탄성 한계를 넘은 상태입니다. 기록해 두고 어떻게 되는지 관찰해 보세요."
+              : "늘어난 길이가 눈금에 맞는지 확인하고 기록하세요.");
+    el.limitAlert.hidden = !(state.perm[state.sid] > 0.05);
+  }
+
+  function refreshAll(animate){
+    if(animate) animateTo(totalCm()); else { state.visCm = totalCm(); drawLab(); }
+    refreshReadouts();
+  }
+
+  /* ---------- 기록 ---------- */
+  function msg(text, kind){
+    el.msg.textContent = text || "";
+    el.msg.className = "msg" + (kind ? " " + kind : "");
+  }
+
+  function record(){
+    if(state.massG<=0){ msg("먼저 추를 한 개 이상 달아 주세요.", "bad"); return; }
+    var over = overLimit(), x = effX(), w = weightN();
+    state.rows.push({
+      spring: state.sid,
+      massG: state.massG,
+      weightN: w,
+      xCm: x,
+      forceN: w,
+      ratio: w/(x/100),
+      over: over
+    });
+    save();
+    renderTable(); renderGraph();
+    msg(over ? "한계를 넘은 상태로 기록했습니다. 비고 칸을 확인하세요." : "표에 기록했습니다.", over ? "bad" : "ok");
+  }
+
+  var SPRING_OF = {};
+  SPRINGS.forEach(function(s){ SPRING_OF[s.id] = s; });
+
+  function renderTable(){
+    var t = el.tbody, html = "", i, r, s;
+    for(i=0;i<state.rows.length;i++){
+      r = state.rows[i]; s = SPRING_OF[r.spring];
+      html += '<tr'+(r.over?' class="over"':'')+'>'
+            + '<td>'+(i+1)+'</td>'
+            + '<td class="spring"><span class="dot" style="background:'+s.color+'"></span>'+s.id+'</td>'
+            + '<td>'+r.massG+'</td>'
+            + '<td>'+fmt(r.weightN,1)+'</td>'
+            + '<td>'+fmt(r.xCm,1)+'</td>'
+            + '<td>'+fmt(r.forceN,1)+'</td>'
+            + '<td class="ratio">'+fmt(r.ratio,1)+'</td>'
+            + '<td>'+(r.over?'⚠ 한계 초과':'')+'</td>'
+            + '</tr>';
+    }
+    if(!state.rows.length){
+      t.innerHTML = '<tr><td colspan="8" class="empty">아직 기록이 없습니다. 위에서 추를 달고 <b>측정 기록하기</b>를 눌러 보세요.</td></tr>';
+      el.tableCaption.innerHTML = '아직 기록이 없습니다. 위에서 추를 달고 <b>측정 기록하기</b>를 눌러 보세요.';
+    } else {
+      t.innerHTML = html;
+      el.tableCaption.innerHTML = '용수철 A는 뻣뻣하기가 중간, B는 아주 뻣뻣, C는 무른 용수철입니다. 표의 마지막 열 값이 일정한지 확인해 보세요.';
+    }
+    el.undoBtn.disabled = !state.rows.length;
+    el.clearBtn.disabled = !state.rows.length;
+    el.csvBtn.disabled = !state.rows.length;
+  }
+
+  /* ---------- 그래프 ---------- */
+  function niceStep(raw){
+    if(!(raw>0)) return 1;
+    var p = Math.pow(10, Math.floor(Math.log10(raw))), n = raw/p, s;
+    if(n<=1) s=1; else if(n<=2) s=2; else if(n<=2.5) s=2.5; else if(n<=5) s=5; else s=10;
+    return s*p;
+  }
+  function tickFmt(v){
+    if(Math.abs(v-Math.round(v))<1e-9) return String(Math.round(v));
+    return String(Math.round(v*100)/100);
+  }
+  function marker(shape, x, y, color, hollow){
+    var fill = hollow ? "#fff" : color;
+    if(shape==="square") return '<rect x="'+(x-5)+'" y="'+(y-5)+'" width="10" height="10" rx="1.5" fill="'+fill+'" stroke="'+color+'" stroke-width="2"/>';
+    if(shape==="triangle") return '<path d="M'+x+' '+(y-6)+' L'+(x+6)+' '+(y+5)+' L'+(x-6)+' '+(y+5)+' Z" fill="'+fill+'" stroke="'+color+'" stroke-width="2"/>';
+    return '<circle cx="'+x+'" cy="'+y+'" r="5" fill="'+fill+'" stroke="'+color+'" stroke-width="2"/>';
+  }
+
+  function renderGraph(){
+    var W=700, H=420, mL=64, mR=26, mT=20, mB=58;
+    var pw = W-mL-mR, ph = H-mT-mB;
+    var mode = state.xMode, i, r;
+
+    var maxX=0, maxY=0;
+    for(i=0;i<state.rows.length;i++){
+      r = state.rows[i];
+      maxX = Math.max(maxX, mode==="len" ? r.xCm : r.massG);
+      maxY = Math.max(maxY, r.forceN);
+    }
+    var xStep = niceStep(Math.max(maxX,1)/5), yStep = niceStep(Math.max(maxY,0.5)/5);
+    var xMax = Math.max(Math.ceil(maxX/xStep)*xStep, xStep*2);
+    var yMax = Math.max(Math.ceil(maxY/yStep)*yStep, yStep*2);
+    if(mode==="mass"){ xStep = Math.max(xStep,50); xMax = Math.max(Math.ceil(maxX/xStep)*xStep, xStep*2); }
+
+    function X(v){ return mL + (v/xMax)*pw; }
+    function Y(v){ return mT + ph - (v/yMax)*ph; }
+
+    var s = '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="탄성력 그래프">';
+    s += '<rect x="'+mL+'" y="'+mT+'" width="'+pw+'" height="'+ph+'" fill="#f7fbfa" stroke="none"/>';
+    // 격자
+    var v;
+    for(v=0; v<=xMax+1e-9; v+=xStep){
+      s += '<line x1="'+X(v)+'" y1="'+mT+'" x2="'+X(v)+'" y2="'+(mT+ph)+'" stroke="#e2e8e4" stroke-width="1"/>';
+      s += '<text x="'+X(v)+'" y="'+(mT+ph+20)+'" font-family="var(--mono)" font-size="11" fill="#6b7c77" text-anchor="middle">'+tickFmt(v)+'</text>';
+    }
+    for(v=0; v<=yMax+1e-9; v+=yStep){
+      s += '<line x1="'+mL+'" y1="'+Y(v)+'" x2="'+(mL+pw)+'" y2="'+Y(v)+'" stroke="#e2e8e4" stroke-width="1"/>';
+      s += '<text x="'+(mL-10)+'" y="'+(Y(v)+4)+'" font-family="var(--mono)" font-size="11" fill="#6b7c77" text-anchor="end">'+tickFmt(v)+'</text>';
+    }
+    // 축
+    s += '<line x1="'+mL+'" y1="'+(mT+ph)+'" x2="'+(mL+pw)+'" y2="'+(mT+ph)+'" stroke="#40534e" stroke-width="1.8"/>';
+    s += '<line x1="'+mL+'" y1="'+mT+'" x2="'+mL+'" y2="'+(mT+ph)+'" stroke="#40534e" stroke-width="1.8"/>';
+    s += '<text x="'+(mL+pw)+'" y="'+(mT+ph+46)+'" font-family="var(--mono)" font-size="12" fill="#40534e" text-anchor="end">'
+       + (mode==="len" ? "늘어난 길이 (cm)" : "추의 질량 (g)") + '</text>';
+    s += '<text x="'+mL+'" y="'+(mT-6)+'" font-family="var(--mono)" font-size="12" fill="#40534e">탄성력의 크기 (N)</text>';
+
+    // 추세선 (원점을 지나는 직선)
+    var series = {};
+    SPRINGS.forEach(function(sp2){ series[sp2.id] = { sx:0, sy:0, sxx:0, n:0, over:0 }; });
+    for(i=0;i<state.rows.length;i++){
+      r = state.rows[i];
+      var xv = (mode==="len" ? r.xCm : r.massG);
+      var se = series[r.spring];
+      if(!r.over){ se.sx += xv; se.sy += r.forceN; se.sxx += xv*xv; se.n++; } else { se.over++; }
+    }
+    var slopes = {};
+    SPRINGS.forEach(function(sp2){
+      var se = series[sp2.id];
+      if(se.n>0 && se.sxx>0){
+        var m = se.sx/1, slope = 0;
+        // 최소제곱 (원점 통과): slope = Σ(x·y)/Σ(x²)
+        slope = 0;
+        for(i=0;i<state.rows.length;i++){
+          var rr = state.rows[i];
+          if(rr.spring!==sp2.id || rr.over) continue;
+          var xx = (mode==="len" ? rr.xCm : rr.massG);
+          slope += xx*rr.forceN;
+        }
+        slope = slope/se.sxx;
+        slopes[sp2.id] = slope;
+        s += '<line x1="'+X(0)+'" y1="'+Y(0)+'" x2="'+X(xMax)+'" y2="'+Y(slope*xMax)+'" stroke="'+sp2.color+'" stroke-width="1.8" stroke-dasharray="7 5" opacity="'+(state.sid===sp2.id?0.95:0.5)+'"/>';
+      }
+    });
+
+    // 측정점
+    for(i=0;i<state.rows.length;i++){
+      r = state.rows[i];
+      var sx = (mode==="len" ? r.xCm : r.massG);
+      var spx = SPRING_OF[r.spring];
+      s += '<title>'+spx.name+' · 질량 '+r.massG+' g · 늘어난 길이 '+fmt(r.xCm,1)+' cm · 탄성력 '+fmt(r.forceN,1)+' N</title>';
+      if(r.over){
+        s += '<circle cx="'+X(sx)+'" cy="'+Y(r.forceN)+'" r="10" fill="none" stroke="'+spx.color+'" stroke-width="1.6" stroke-dasharray="3 3"/>';
+      }
+      s += marker(spx.shape, X(sx), Y(r.forceN), spx.color, r.over);
+    }
+    s += '</svg>';
+
+    var empty = state.rows.length===0;
+    el.graphBox.innerHTML = empty
+      ? '<div class="empty" style="padding:52px 16px">아직 점이 없습니다. 추를 달고 <b>측정 기록하기</b>를 누르면 그래프에 점이 하나씩 찍힙니다.</div>'
+      : s;
+
+    // 범례
+    var lg = "", unit = (mode==="len" ? "N/cm" : "N/g");
+    SPRINGS.forEach(function(sp2){
+      var count = 0, ov = 0;
+      for(i=0;i<state.rows.length;i++){ if(state.rows[i].spring===sp2.id){ count++; if(state.rows[i].over) ov++; } }
+      var slopeTxt = (slopes[sp2.id]!==undefined) ? ("기울기 "+fmt(slopes[sp2.id], mode==="len"?2:3)+" "+unit) : "기록 없음";
+      lg += '<div class="lg'+(count?"":" off")+'"><span class="dot" style="background:'+sp2.color+'"></span>'
+          + '<span>'+sp2.name+(ov?' <b style="color:#bf4527">⚠'+ov+'</b>':'')+'</span><b>'+slopeTxt+'</b></div>';
+    });
+    el.legend.innerHTML = lg;
+
+    el.graphHint.textContent = state.rows.length>1
+      ? (mode==="len" ? "점들이 원점을 지나는 직선 근처에 모이면 늘어난 길이가 탄성력에 비례합니다."
+                      : "가로축을 질량으로 바꾸어도 직선 모양입니다. 기울기가 무게의 크기와 어떤 관련이 있는지 살펴보세요.")
+      : "점이 2개 이상 모이면 직선(비례 관계)이 보입니다.";
+  }
+
+  /* ---------- 학생별 저장 (1학년 2반 1~27번) ---------- */
+  var CLASS_NAME = "1학년 2반";
+  var STUDENT_MAX = 27;
+  var KEY_BASE = "elastic-force-lab-1-2";
+  var LAST_KEY = KEY_BASE + "-last";
+
+  function keyFor(no){ return KEY_BASE + "-no" + no; }
+
+  function resetState(){
+    state.sid = "A";
+    state.massG = 0;
+    state.perm = { A:0, B:0, C:0 };
+    state.rows = [];
+    state.xMode = "len";
+    document.querySelectorAll("[data-q]").forEach(function(n){ n.value = ""; });
+  }
+
+  function save(){
+    try{
+      if(!state.no) return;
+      var answers = {};
+      document.querySelectorAll("[data-q]").forEach(function(n){ answers[n.getAttribute("data-q")] = n.value; });
+      localStorage.setItem(keyFor(state.no), JSON.stringify({
+        no:state.no, name:state.name || "", updated:Date.now(),
+        sid:state.sid, massG:state.massG, perm:state.perm, rows:state.rows, xMode:state.xMode, answers:answers
+      }));
+    }catch(e){}
+  }
+
+  function readStudent(no){
+    try{
+      var raw = localStorage.getItem(keyFor(no));
+      if(!raw) return null;
+      var d = JSON.parse(raw);
+      return (d && typeof d==="object") ? d : null;
+    }catch(e){ return null; }
+  }
+
+  function load(no){
+    var d = readStudent(no);
+    if(!d) return false;
+    if(d.sid && SPRING_OF[d.sid]) state.sid = d.sid;
+    if(typeof d.massG==="number") state.massG = d.massG;
+    if(d.perm) state.perm = { A:d.perm.A||0, B:d.perm.B||0, C:d.perm.C||0 };
+    if(d.rows && d.rows.length) state.rows = d.rows;
+    if(d.xMode) state.xMode = d.xMode;
+    if(d.answers){
+      document.querySelectorAll("[data-q]").forEach(function(n){
+        var k = n.getAttribute("data-q");
+        if(d.answers[k]!==undefined) n.value = d.answers[k];
+      });
+    }
+    return true;
+  }
+
+  function recordsOf(no){
+    var d = readStudent(no);
+    return (d && d.rows) ? d.rows.length : 0;
+  }
+
+  function answersOf(no){
+    var d = readStudent(no);
+    if(!d || !d.answers) return 0;
+    var n = 0;
+    Object.keys(d.answers).forEach(function(k){
+      if(d.answers[k] && String(d.answers[k]).trim()) n++;
+    });
+    return n;
+  }
+
+  function setWho(){
+    document.getElementById("whoNo").textContent = state.no ? (state.no + "번") : "–";
+    document.getElementById("whoName").textContent = state.name ? (" · " + state.name) : "";
+  }
+
+  /* ---------- 학생 선택 화면 ---------- */
+  var gate = document.getElementById("gate");
+  var teacherPanel = document.getElementById("teacherPanel");
+  var roster = document.getElementById("roster");
+  var nameInput = document.getElementById("stuName");
+
+  function buildRoster(){
+    var h = "", i, c;
+    for(i=1;i<=STUDENT_MAX;i++){
+      c = recordsOf(i);
+      h += '<button type="button" data-no="' + i + '" class="' + (c ? "done" : "") + '"'
+         + ' aria-label="' + i + '번' + (c ? " (기록 " + c + "개)" : "") + '">'
+         + i + (c ? '<small>' + c + '</small>' : '') + '</button>';
+    }
+    roster.innerHTML = h;
+    roster.querySelectorAll("button").forEach(function(b){
+      b.addEventListener("click", function(){
+        enterStudent(parseInt(b.getAttribute("data-no"), 10));
+      });
+    });
+    document.getElementById("rosterInfo").textContent =
+      "초록색 번호는 이미 기록이 있는 학생입니다 (이 기기 기준).";
+  }
+
+  function enterStudent(no){
+    state.no = no;
+    resetState();
+    var had = load(no);
+    var d = readStudent(no);
+    var typed = (nameInput && nameInput.value ? nameInput.value : "").replace(/^\s+|\s+$/g, "");
+    state.name = typed || ((d && d.name) ? d.name : "");
+    try{ localStorage.setItem(LAST_KEY, String(no)); }catch(e){}
+    gate.hidden = true;
+    teacherPanel.hidden = true;
+    setWho();
+    buildSegment();
+    el.axisToggle.querySelectorAll("button").forEach(function(x){
+      x.setAttribute("aria-pressed", String(x.getAttribute("data-mode") === state.xMode));
+    });
+    refreshAll(false);
+    renderTable();
+    renderGraph();
+    buildTeacher();
+    if(typed) save();
+    window.scrollTo(0, 0);
+    msg(had ? (no + "번 학생의 이전 기록을 불러왔습니다. 이어서 실험하세요.")
+            : (no + "번 학생 · 새로 시작합니다. 추를 달아 보세요!"), had ? "ok" : "");
+  }
+
+  function openGate(){
+    save();
+    buildRoster();
+    gate.hidden = false;
+    teacherPanel.hidden = true;
+    if(nameInput) nameInput.value = state.name || "";
+  }
+
+  document.getElementById("changeBtn").addEventListener("click", openGate);
+  document.getElementById("teacherBtn").addEventListener("click", function(){
+    save(); renderTeacher(); gate.hidden = true; teacherPanel.hidden = false;
+  });
+  document.getElementById("gateTeacher").addEventListener("click", function(){
+    renderTeacher(); gate.hidden = true; teacherPanel.hidden = false;
+  });
+
+  /* ---------- 교사용 현황 ---------- */
+  function pad(v){ return (v<10?"0":"") + v; }
+
+  function buildTeacher(){
+    var body = document.getElementById("tpBody");
+    var h = "", i, d, cnt, ans, ts, total = 0, done = 0;
+    for(i=1;i<=STUDENT_MAX;i++){
+      d = readStudent(i);
+      cnt = (d && d.rows) ? d.rows.length : 0;
+      ans = answersOf(i);
+      if(cnt > 0){ done++; total += cnt; }
+      if(d && d.updated){
+        var t = new Date(d.updated);
+        ts = (t.getMonth()+1) + "/" + t.getDate() + " " + pad(t.getHours()) + ":" + pad(t.getMinutes());
+      } else { ts = "–"; }
+      h += '<tr>'
+         + '<td class="num">' + i + '</td>'
+         + '<td>' + ((d && d.name) ? d.name : "") + '</td>'
+         + '<td class="' + (cnt ? "full" : "zero") + '">' + cnt + '</td>'
+         + '<td class="' + (ans ? "full" : "zero") + '">' + ans + '/5</td>'
+         + '<td class="' + (cnt ? "" : "zero") + '">' + ts + '</td>'
+         + '<td><div class="mini">'
+         + '<button class="btn tiny ghost" type="button" data-open="' + i + '">열기</button>'
+         + '<button class="btn tiny ghost" type="button" data-del="' + i + '">삭제</button>'
+         + '</div></td></tr>';
+    }
+    body.innerHTML = h;
+    document.getElementById("tpSum").textContent =
+      "기록이 있는 학생 " + done + "/" + STUDENT_MAX + "명 · 총 " + total + "건";
+    body.querySelectorAll("button[data-open]").forEach(function(b){
+      b.addEventListener("click", function(){
+        enterStudent(parseInt(b.getAttribute("data-open"), 10));
+      });
+    });
+    body.querySelectorAll("button[data-del]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var no = parseInt(b.getAttribute("data-del"), 10);
+        if(!window.confirm(no + "번 학생의 기록과 답안을 지울까요?")) return;
+        try{ localStorage.removeItem(keyFor(no)); }catch(e){}
+        if(state.no === no){ state.no = 0; resetState(); refreshAll(false); renderTable(); renderGraph(); setWho(); }
+        renderTeacher();
+      });
+    });
+  }
+
+  function renderTeacher(){ buildTeacher(); }
+
+  document.getElementById("tpClose").addEventListener("click", function(){
+    teacherPanel.hidden = true;
+    if(!state.no) openGate();
+  });
+
+  document.getElementById("tpCsv").addEventListener("click", function(){
+    var head = "번호,이름,순번,용수철,질량(g),무게(N),늘어난길이(cm),탄성력의크기(N),비율(N/m),비고";
+    var lines = [head], i, k, d, r, any = false;
+    for(i=1;i<=STUDENT_MAX;i++){
+      d = readStudent(i);
+      if(!d || !d.rows || !d.rows.length) continue;
+      for(k=0;k<d.rows.length;k++){
+        r = d.rows[k]; any = true;
+        lines.push([i, d.name || "", k+1, r.spring, r.massG, fmt(r.weightN,1), fmt(r.xCm,1),
+                    fmt(r.forceN,1), fmt(r.ratio,1), r.over ? "한계초과" : ""].join(","));
+      }
+    }
+    if(!any){ msg("내보낼 기록이 없습니다.", "bad"); return; }
+    downloadCsv('1학년2반_탄성력_전체기록.csv', lines.join("\n"));
+  });
+
+  document.getElementById("tpClear").addEventListener("click", function(){
+    if(!window.confirm("이 기기에 저장된 1학년 2반 전체 기록과 답안을 모두 지울까요? 되돌릴 수 없습니다.")) return;
+    for(var i=1;i<=STUDENT_MAX;i++){ try{ localStorage.removeItem(keyFor(i)); }catch(e){} }
+    try{ localStorage.removeItem(LAST_KEY); }catch(e){}
+    state.no = 0; resetState();
+    refreshAll(false); renderTable(); renderGraph(); setWho(); buildTeacher();
+    openGate();
+  });
+
+  function downloadCsv(filename, text){
+    var blob = new Blob(["\ufeff" + text], {type:"text/csv;charset=utf-8;"});
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 2000);
+  }
+
+  /* ---------- 용수철 선택 UI ---------- */
+  function buildSegment(){
+    var h = "";
+    SPRINGS.forEach(function(s){
+      h += '<button type="button" data-sid="'+s.id+'" aria-pressed="'+(state.sid===s.id)+'">'
+         + s.name + '<small>'+s.desc+'</small></button>';
+    });
+    el.springSeg.innerHTML = h;
+    el.springSeg.querySelectorAll("button").forEach(function(b){
+      b.addEventListener("click", function(){
+        if(state.sid === b.getAttribute("data-sid")) return;
+        state.sid = b.getAttribute("data-sid");
+        buildSegment(); refreshAll(true); renderGraph(); save();
+        msg("용수철 " + state.sid + "로 바꿨습니다. " + (state.perm[state.sid]>0.05 ? "이 용수철은 이미 늘어난 상태입니다." : ""), "");
+      });
+    });
+  }
+
+  /* ---------- 이벤트 ---------- */
+  el.plus.addEventListener("click", function(){
+    if(state.massG >= 800) return;
+    state.massG += 100;
+    if(rawX() > sp().limit){
+      state.perm[state.sid] = Math.max(state.perm[state.sid], Math.min(4, (rawX()-sp().limit)*0.5));
+    }
+    refreshAll(true); renderGraph(); save();
+    msg(overLimit() ? "탄성 한계를 넘었습니다! 오른쪽 경고를 읽어 보세요." : "", overLimit() ? "bad" : "");
+  });
+  el.minus.addEventListener("click", function(){
+    if(state.massG <= 0) return;
+    state.massG -= 100;
+    refreshAll(true); renderGraph(); save();
+    msg(state.perm[state.sid]>0.05 && state.massG===0 ? "추를 모두 내려도 용수철이 원래 길이로 돌아오지 않습니다." : "", "");
+  });
+  el.recordBtn.addEventListener("click", record);
+  el.replaceBtn.addEventListener("click", function(){
+    state.perm[state.sid] = 0;
+    refreshAll(true); renderGraph(); save();
+    msg("새 용수철로 교체했습니다. 기록은 그대로 남아 있습니다.", "ok");
+  });
+  el.undoBtn.addEventListener("click", function(){
+    state.rows.pop(); save(); renderTable(); renderGraph(); msg("마지막 기록을 지웠습니다.", "");
+  });
+  el.clearBtn.addEventListener("click", function(){
+    if(!window.confirm("측정 기록을 모두 지울까요? (생각해보기 답안은 그대로 남습니다)")) return;
+    state.rows = []; state.perm = {A:0,B:0,C:0}; state.massG = 0;
+    save(); renderTable(); renderGraph(); refreshAll(true); msg("기록을 모두 지웠습니다.", "");
+  });
+  el.csvBtn.addEventListener("click", function(){
+    var head = "순번,용수철,추의질량(g),무게(N),늘어난길이(cm),탄성력의크기(N),탄성력/늘어난길이(N/m),비고";
+    var lines = [head], i, r;
+    for(i=0;i<state.rows.length;i++){
+      r = state.rows[i];
+      lines.push([i+1, r.spring, r.massG, fmt(r.weightN,1), fmt(r.xCm,1), fmt(r.forceN,1), fmt(r.ratio,1), r.over?"한계초과":""].join(","));
+    }
+    var blob = new Blob(["\ufeff"+lines.join("\n")], {type:"text/csv;charset=utf-8;"});
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = CLASS_NAME + "_" + state.no + "번_탄성력_측정기록.csv";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 2000);
+    msg("CSV 파일로 저장했습니다.", "ok");
+  });
+  el.printBtn.addEventListener("click", function(){ window.print(); });
+
+  el.axisToggle.querySelectorAll("button").forEach(function(b){
+    b.addEventListener("click", function(){
+      state.xMode = b.getAttribute("data-mode");
+      el.axisToggle.querySelectorAll("button").forEach(function(x){
+        x.setAttribute("aria-pressed", String(x.getAttribute("data-mode")===state.xMode));
+      });
+      renderGraph(); save();
+    });
+  });
+
+  document.querySelectorAll("[data-q]").forEach(function(n){
+    var t = null;
+    n.addEventListener("input", function(){
+      if(t) clearTimeout(t);
+      t = setTimeout(save, 600);
+    });
+  });
+
+  /* ---------- 시작 ---------- */
+  el.axisToggle.querySelectorAll("button").forEach(function(x){
+    x.setAttribute("aria-pressed", String(x.getAttribute("data-mode")===state.xMode));
+  });
+  buildSegment();
+  refreshAll(false);
+  renderTable();
+  renderGraph();
+  buildTeacher();
+  var lastNo = 0;
+  try{ lastNo = parseInt(localStorage.getItem(LAST_KEY) || "0", 10) || 0; }catch(e){}
+  if(lastNo >= 1 && lastNo <= STUDENT_MAX){
+    enterStudent(lastNo);
+    msg(lastNo + "번으로 이어서 시작합니다. 다른 번호로 바꾸려면 [번호 변경]을 누르세요.", "ok");
+  } else {
+    setWho();
+    openGate();
+  }
+})();
+</script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
+</body>
+</html>
